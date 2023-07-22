@@ -4,7 +4,7 @@ import { generateUUID } from '@/features/shared'
 export const API_URL = 'https://clownfish-app-bvrqr.ondigitalocean.app'
 
 export const API_ENDPOINTS = {
-  assets: (chainId: number) => `${API_URL}/assets/${chainId}`,
+  getAssets: (chainId: number) => `${API_URL}/assets/${chainId}`,
   placeOrder: () => `${API_URL}/order`,
   getOrders: (safeAddress: string) => `${API_URL}/order/${safeAddress}`,
   createAccount: () => `${API_URL}/user`

@@ -1,9 +1,11 @@
+import React from 'react'
+
 import { AbstractSwapWrapper, LimitOrder } from '@/features/console'
 
-export default function Index() {
+export default function LimitOrderPage() {
   return <LimitOrder />
 }
 
-Index.getLayout = function getLayout(page: React.ReactElement) {
+LimitOrderPage.getLayout = function getLayout(page: React.ReactElement) {
   return <AbstractSwapWrapper>{page}</AbstractSwapWrapper>
 }
