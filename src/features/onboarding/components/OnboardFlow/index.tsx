@@ -12,6 +12,7 @@ import {
 import { OnboardingFormData, OnboardingStep } from '@/features/onboarding/types'
 
 import AccountNameStep from '../AccountNameStep'
+import * as webauthn from '@passwordless-id/webauthn'
 
 const Header = dynamic(() => import('@/features/shared/components/Header'), {
   ssr: false
@@ -20,6 +21,8 @@ const Header = dynamic(() => import('@/features/shared/components/Header'), {
 import * as S from './styles'
 
 export default function OnboardFlow() {
+  const { push } = useRouter()
+
   const [formData, setFormData] = useState<OnboardingFormData>({
     accountName: ''
   })
@@ -51,8 +54,26 @@ export default function OnboardFlow() {
   }
 
   async function handleSubmit() {
-    // TODO: handle webauthn here
-    console.log('submitted')
+    try {
+      const res = await webauthn.client.register(
+        formData.accountName,
+        window.crypto.randomUUID(),
+        { authenticatorType: 'auto' }
+      )
+
+      const {
+        username,
+        credential: { id: credentialId }
+      } = webauthn.parsers.parseRegistration(res)
+
+      // TODO: Deploy AA safe here
+      const safeAddress = '0xAE75B29ADe678372D77A8B41225654138a7E6ff1'
+
+      localStorageService.setAuthUserData(username, credentialId, safeAddress)
+      push('/limit-order')
+    } catch (err) {
+      console.error('[ERROR] on handleSubmit', err)
+    }
   }
 
   return (
