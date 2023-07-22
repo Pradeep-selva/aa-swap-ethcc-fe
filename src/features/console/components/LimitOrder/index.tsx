@@ -17,7 +17,7 @@ import {
   Typography,
   localStorageService
 } from '@/features/shared'
-import MinERC20 from '@/features/shared/assets/abi/minERC20.json'
+import MinERC20 from '@/features/shared/assets/abi/MinERC20.json'
 import * as webauthn from '@passwordless-id/webauthn'
 import React from 'react'
 import * as S from './styles'
