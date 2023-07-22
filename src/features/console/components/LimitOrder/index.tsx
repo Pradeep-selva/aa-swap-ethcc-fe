@@ -33,10 +33,6 @@ export default function LimitOrder() {
   const [isUserAssetView, setIsUserAssetView] = React.useState(false)
   const [isOrderHistoryView, setIsOrderHistoryView] = React.useState(false)
 
-  React.useEffect(() => {
-    fetchAllAssets().then(refreshBalances)
-  }, [])
-
   const fetchAllAssets = async () => {
     // TODO: change chain id to xDAI after testing
     const { data } = await apiInstance.get<TAsset[]>(API_ENDPOINTS.getAssets(5))
@@ -105,6 +101,15 @@ export default function LimitOrder() {
       setUserAssets(_userAssets)
     }
   }
+
+  React.useEffect(() => {
+    fetchAllAssets()
+  }, [])
+
+  React.useEffect(() => {
+    refreshBalances()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allAssets])
 
   return userAssets.length ? (
     <>
