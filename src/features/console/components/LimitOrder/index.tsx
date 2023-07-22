@@ -268,7 +268,7 @@ export default function LimitOrder() {
                 </Typography>
                 <StyledInput
                   name="depositAmount"
-                  value={'0'}
+                  value={`${buyAsset!.prices.default}`}
                   onChange={(e) => console.log('test:', e)}
                   autoComplete="off"
                 />
@@ -308,7 +308,7 @@ export default function LimitOrder() {
           <Button
             buttonSize="L"
             onClick={() => console.log('place order')}
-            disabled={isSellAmountValid}
+            disabled={!isSellAmountValid || sellAmount === ''}
           >
             Place order
           </Button>
