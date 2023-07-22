@@ -12,6 +12,7 @@ import {
   LoaderLottie,
   LogoViewer,
   RightArrow,
+  SendIcon,
   TooltipBox,
   Typography,
   localStorageService
@@ -27,6 +28,20 @@ import SlippageAmount from './SlippageAmount'
 import { TAsset } from '../../types'
 import { formatUnits } from 'ethers/lib/utils.js'
 import { API_ENDPOINTS, apiInstance } from '@/lib/axios'
+import Link from 'next/link'
+
+const mockOrders = [
+  {
+    orderId: 1,
+    txHash: 'https://www.google.com',
+    logo: 'https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DGNO.svg'
+  },
+  {
+    orderId: 2,
+    txHash: 'https://www.amazon.in',
+    logo: 'https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DGNO.svg'
+  }
+]
 
 export default function LimitOrder() {
   const { theme } = useThemeContext()
@@ -249,7 +264,7 @@ export default function LimitOrder() {
                 flexDirection="column"
               >
                 <Typography type="BODY_MEDIUM_S" color={theme.colors.gray300}>
-                  {buyAsset!.name || ''} asset price
+                  {buyAsset!.name || ''} price in USD
                 </Typography>
                 <StyledInput
                   name="depositAmount"
@@ -302,7 +317,7 @@ export default function LimitOrder() {
         <FlexContainer
           gap={1.6}
           alignItems="center"
-          style={{ marginBottom: isUserAssetView ? '1.5vh' : '3vh' }}
+          style={{ marginBottom: isOrderHistoryView ? '-1vh' : '3vh' }}
         >
           <CloseButtonBox
             icon={isOrderHistoryView ? <DownArrow /> : <RightArrow />}
@@ -310,6 +325,44 @@ export default function LimitOrder() {
           />
           <Typography type="TITLE_M">Order History</Typography>
         </FlexContainer>
+        {isOrderHistoryView && (
+          <FlexContainer
+            gap={1}
+            flexDirection="column"
+            style={{
+              border: '1.5px solid rgba(255, 255, 255, 0.04)',
+              borderRadius: '10px',
+              padding: '1rem 2rem'
+            }}
+          >
+            {mockOrders.map(({ orderId, txHash, logo }, idx) => (
+              <FlexContainer
+                key={idx}
+                justifyContent="space-between"
+                style={{ width: '100%' }}
+              >
+                <FlexContainer alignItems="center" gap={1} flex={true}>
+                  <LogoViewer logo={logo} />
+                  <Typography type="BODY_MEDIUM_M">Order #{orderId}</Typography>
+                </FlexContainer>
+                <FlexContainer flex={false}>
+                  <Typography
+                    type="BODY_M"
+                    style={{
+                      alignItems: 'center',
+                      display: 'flex'
+                    }}
+                  >
+                    <SendIcon />
+                    <Link style={{ marginLeft: '1rem' }} href={txHash}>
+                      View Tx
+                    </Link>
+                  </Typography>
+                </FlexContainer>
+              </FlexContainer>
+            ))}
+          </FlexContainer>
+        )}
       </S.DCAWrapper>
     </>
   ) : (
