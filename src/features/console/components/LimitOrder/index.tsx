@@ -1,11 +1,14 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { useThemeContext } from '@/hooks/themeProvider'
 import {
   Button,
   CloseButtonBox,
+  DelayedLottiesLoading,
   DownArrow,
   FlexContainer,
   HrLine,
   LightPanel,
+  LoaderLottie,
   LogoViewer,
   RightArrow,
   TooltipBox,
@@ -33,6 +36,15 @@ export default function LimitOrder() {
   const [isUserAssetView, setIsUserAssetView] = React.useState(false)
   const [isOrderHistoryView, setIsOrderHistoryView] = React.useState(false)
 
+  const [sellAsset, setSellAsset] = React.useState<TAsset>()
+  const [buyAsset, setBuyAsset] = React.useState<TAsset>()
+  const [sellAmount, setSellAmount] = React.useState<string>('')
+
+  const maxSellAssetBalance = React.useMemo(
+    () => sellAsset?.balanceOf?.value || BigNumber.from(0),
+    [sellAsset]
+  )
+
   const fetchAllAssets = async () => {
     // TODO: change chain id to xDAI after testing
     const { data } = await apiInstance.get<TAsset[]>(API_ENDPOINTS.getAssets(5))
@@ -41,7 +53,6 @@ export default function LimitOrder() {
 
   const refreshBalances = async () => {
     if (allAssets.length) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const userData = localStorageService.getAuthUserData()!
       const mainnetProvider = new ethers.providers.JsonRpcProvider(
         process.env.NEXT_PUBLIC_RPC
@@ -66,20 +77,16 @@ export default function LimitOrder() {
               )
             }
 
-            const totalAssetValue = multiplyBNWithFloat(
-              assetBalanceOf,
-              asset.prices.default
-            )
             const formattedBal = formatUnits(assetBalanceOf, asset.decimals)
 
             return {
               ...asset,
-              value: formatUnits(totalAssetValue, asset.decimals),
+              value: formatUnits(assetBalanceOf, asset.decimals),
               balanceOf: {
                 decimals: asset.decimals,
                 formatted: formattedBal.slice(0, formattedBal.indexOf('.') + 3),
                 symbol: asset.name,
-                value: BigNumber.from(totalAssetValue)
+                value: BigNumber.from(assetBalanceOf)
               }
             }
           } catch (err) {
@@ -98,8 +105,27 @@ export default function LimitOrder() {
         })
       )
       console.log('assets', _userAssets)
+      setSellAsset(_userAssets[0])
+      setBuyAsset(_userAssets[0])
       setUserAssets(_userAssets)
     }
+  }
+
+  const handleAuthentication: any = async () => {
+    const userData = localStorageService.getAuthUserData()!
+
+    const res = await webauthn.client.authenticate(
+      [userData.credentialId],
+      window.crypto.randomUUID(),
+      { authenticatorType: 'auto' }
+    )
+
+    const {
+      authenticator: {
+        flags: { userVerified }
+      }
+    } = webauthn.parsers.parseAuthentication(res)
+    console.log('isUserVerified', userVerified)
   }
 
   React.useEffect(() => {
@@ -168,12 +194,12 @@ export default function LimitOrder() {
             <S.SellReceiveItem width={70} flex={false}>
               <InputField
                 title="Sell"
-                inputValue={'0'}
-                setInputValue={() => console.log('test')}
-                setSelectedAsset={(asset) => console.log(asset)}
-                selectedAsset={userAssets?.[0]}
+                inputValue={sellAmount}
+                setInputValue={(amount) => setSellAmount(amount)}
+                setSelectedAsset={(asset) => setSellAsset(asset)}
+                selectedAsset={sellAsset!}
                 availableAssets={userAssets}
-                getMaxTokenBalanceAvailable={BigNumber.from(1e9).mul(1e9)}
+                getMaxTokenBalanceAvailable={maxSellAssetBalance}
               />
             </S.SellReceiveItem>
             <S.SellReceiveItem
@@ -195,9 +221,10 @@ export default function LimitOrder() {
               </FlexContainer>
               <FlexContainer alignItems="flex-end">
                 <InputAssetSelector
-                  selectedAsset={userAssets?.[0]}
-                  availableAssets={userAssets}
-                  setSelectedAsset={() => console.log('test')}
+                  hideSecondary
+                  selectedAsset={buyAsset!}
+                  availableAssets={allAssets}
+                  setSelectedAsset={(asset) => setBuyAsset(asset)}
                   searchText="Asset to swap into"
                 />
               </FlexContainer>
@@ -214,7 +241,7 @@ export default function LimitOrder() {
                 flexDirection="column"
               >
                 <Typography type="BODY_MEDIUM_S" color={theme.colors.gray300}>
-                  {allAssets[0]?.name || ''} asset price
+                  {buyAsset!.name || ''} asset price
                 </Typography>
                 <StyledInput
                   name="depositAmount"
@@ -259,6 +286,17 @@ export default function LimitOrder() {
       </S.DCAWrapper>
     </>
   ) : (
-    <></>
+    <>
+      <FlexContainer
+        alignItems="center"
+        justifyContent="center"
+        flexDirection="column"
+        gap={2}
+        style={{ height: '60vh' }}
+      >
+        <DelayedLottiesLoading lotties={[LoaderLottie]} />
+        <Typography type="BODY_MEDIUM_M">Getting your details ...</Typography>
+      </FlexContainer>
+    </>
   )
 }

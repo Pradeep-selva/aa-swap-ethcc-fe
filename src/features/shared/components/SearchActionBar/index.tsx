@@ -22,6 +22,7 @@ type SearchActionBarProps<T> = {
   backButtonClick?: () => void
   searchText?: string
   emptyResultText?: string
+  hideSecondary?: boolean
 }
 
 export default function SearchActionBar<T>({
@@ -33,7 +34,8 @@ export default function SearchActionBar<T>({
   closeButtonClick,
   backButtonClick,
   searchText,
-  emptyResultText = 'No result found'
+  emptyResultText = 'No result found',
+  hideSecondary = false
 }: SearchActionBarProps<T>) {
   const { theme } = useThemeContext()
   const [filter, setFilter] = useState<string>('')
@@ -81,7 +83,7 @@ export default function SearchActionBar<T>({
                   actionIcon={actionItem.icon as string}
                   strategyIcon={actionItem?.secondaryIcon}
                   title={actionItem.name}
-                  secondaryInfo={actionItem?.secondaryInfo}
+                  secondaryInfo={hideSecondary ? '' : actionItem?.secondaryInfo}
                   onClickItem={() => handleSelect(actionItem)}
                 />
               ))

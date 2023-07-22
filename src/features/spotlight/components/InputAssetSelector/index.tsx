@@ -20,6 +20,7 @@ type InputAssetSelectorProps = {
   setSelectedAsset?: (asset: TAsset) => void
   searchText?: string
   disabled?: boolean
+  hideSecondary?: boolean
 }
 
 export default function InputAssetSelector({
@@ -27,7 +28,8 @@ export default function InputAssetSelector({
   setSelectedAsset,
   searchText = 'Search wallet assets',
   availableAssets = [],
-  disabled = false
+  disabled = false,
+  hideSecondary = false
 }: InputAssetSelectorProps) {
   const { theme } = useThemeContext()
   const [selectModalIsOpen, setSelectModalIsOpen] = useState(false)
@@ -102,17 +104,9 @@ export default function InputAssetSelector({
             setSelectedAsset(asset.data)
             setSelectModalIsOpen(false)
           }}
+          hideSecondary={hideSecondary}
         />
       </Modal>
     </FlexContainer>
   )
 }
-
-const InputSelectorWrapper = styled(FlexContainer)`
-  ${({ theme }) => css`
-    border: 1px solid ${theme.colors.gray600};
-    border-radius: 0.4rem;
-  `}
-`
-
-/* cursor: ${availableAssets.length > 0 ? 'pointer' : 'default'}; */
