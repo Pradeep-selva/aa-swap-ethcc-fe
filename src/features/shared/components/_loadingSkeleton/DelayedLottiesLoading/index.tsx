@@ -35,7 +35,7 @@ export default function DelayedLottiesLoading({
     <S.StyledDelayedLotties>
       {[...Array(itemNumber)].map((item, idx) => (
         <div key={idx}>
-          <FlexContainer justifyContent="space-between" key={idx}>
+          <FlexContainer alignItems="center" justifyContent="center" key={idx}>
             <InlineLottieWrapper
               key={idx}
               lotties={lotties}
