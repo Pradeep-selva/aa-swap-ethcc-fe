@@ -5,6 +5,7 @@ import {
   CloseButtonBox,
   DelayedLottiesLoading,
   DownArrow,
+  ErrorOutline,
   FlexContainer,
   HrLine,
   LightPanel,
@@ -44,6 +45,11 @@ export default function LimitOrder() {
     [sellAsset]
   )
 
+  const isSellAmountValid = React.useMemo(
+    () => sellAmount === '' || parseFloat(sellAmount) > 0,
+    [sellAmount]
+  )
+
   const fetchAllAssets = async () => {
     // TODO: change chain id to xDAI after testing
     const { data } = await apiInstance.get<TAsset[]>(API_ENDPOINTS.getAssets(5))
@@ -63,7 +69,10 @@ export default function LimitOrder() {
             const assetAddress = asset.address
 
             let assetBalanceOf: BigNumber
-            if (assetAddress != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE') {
+            if (
+              assetAddress !== '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' &&
+              assetAddress !== '0x0000000000000000000000000000000000000000'
+            ) {
               const token = new ethers.Contract(
                 assetAddress,
                 MinERC20,
@@ -253,6 +262,25 @@ export default function LimitOrder() {
             </FlexContainer>
           </S.DCASwap>
 
+          {!isSellAmountValid && (
+            <FlexContainer
+              padding="0 1.6rem 0 1.6rem"
+              style={{ marginBottom: '2rem' }}
+            >
+              <S.GrayBGDiv borderRadius="0.4rem" margin="0">
+                <ErrorOutline
+                  color={theme.colors.warning}
+                  width={40}
+                  height={40}
+                />
+                <Typography type="BODY_XS" color={theme.colors.gray400}>
+                  The amount to swap is too low to place this order as the fees
+                  exceed received assets
+                </Typography>
+              </S.GrayBGDiv>
+            </FlexContainer>
+          )}
+
           <S.GrayBGDiv margin="0" borderRadius="0 0 0.8rem 0.8rem">
             <Typography type="BODY_XS" color={theme.colors.gray400}>
               Swaps will be executed when the maximum acceptable price of asset
@@ -265,7 +293,7 @@ export default function LimitOrder() {
           <Button
             buttonSize="L"
             onClick={() => console.log('place order')}
-            disabled={false}
+            disabled={isSellAmountValid}
           >
             Place order
           </Button>
