@@ -13,8 +13,7 @@ import {
   RightArrow,
   TooltipBox,
   Typography,
-  localStorageService,
-  multiplyBNWithFloat
+  localStorageService
 } from '@/features/shared'
 import MinERC20 from '@/features/shared/assets/abi/minERC20.json'
 import * as webauthn from '@passwordless-id/webauthn'
@@ -64,7 +63,7 @@ export default function LimitOrder() {
             const assetAddress = asset.address
 
             let assetBalanceOf: BigNumber
-            if (assetAddress != '0x0000000000000000000000000000000000000000') {
+            if (assetAddress != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE') {
               const token = new ethers.Contract(
                 assetAddress,
                 MinERC20,
