@@ -44,7 +44,7 @@ export default class MyDocument extends Document {
           <link rel="shortcut icon" href="/favicon.png" />
           <link rel="apple-touch-icon" href="/favicon.png" />
           <meta name="theme-color" content="#06092B" />
-          <meta property="og:site_name" content="Abstract Swap" />
+          <meta property="og:site_name" content="1Wallet" />
         </Head>
         <body>
           <Main />

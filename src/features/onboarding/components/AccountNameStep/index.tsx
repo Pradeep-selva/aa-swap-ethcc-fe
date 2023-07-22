@@ -48,7 +48,7 @@ export default function AccountNameStep({
   }
 
   return (
-    <OnboardStepLayout title="Cool Title for onboarding">
+    <OnboardStepLayout title="Welcome to 1Wallet">
       <S.AccountNameStepWrapper>
         <Panel
           titleType="BODY_MEDIUM_S"

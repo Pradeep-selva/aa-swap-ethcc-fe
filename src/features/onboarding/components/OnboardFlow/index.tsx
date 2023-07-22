@@ -72,15 +72,16 @@ export default function OnboardFlow() {
       } = webauthn.parsers.parseRegistration(res)
 
       setLoading(true)
-      const {
-        data: { safeAddress }
-      } = await apiInstance.post<{ safeAddress: string }>(
-        API_ENDPOINTS.createAccount(),
-        {
-          clientId: credentialId
-        }
-      )
+      // const {
+      //   data: { safeAddress }
+      // } = await apiInstance.post<{ safeAddress: string }>(
+      //   API_ENDPOINTS.createAccount(),
+      //   {
+      //     clientId: credentialId
+      //   }
+      // )
       setLoading(false)
+      const safeAddress = '0xAE75B29ADe678372D77A8B41225654138a7E6ff1'
 
       localStorageService.setAuthUserData(username, credentialId, safeAddress)
       push('/limit-order')

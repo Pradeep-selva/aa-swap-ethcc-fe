@@ -14,9 +14,7 @@ export default function HeaderUI() {
 
   return (
     <S.HeaderWrapper>
-      <Typography type={isSmall ? 'TITLE_L' : 'TITLE_XL'}>
-        Abstract Swap
-      </Typography>
+      <Typography type={isSmall ? 'TITLE_L' : 'TITLE_XL'}>1Wallet</Typography>
 
       <FlexContainer
         justifyContent="flex-end"

@@ -307,7 +307,7 @@ export default function LimitOrder() {
         <FlexContainer width={100} style={{ marginBottom: '6rem' }}>
           <Button
             buttonSize="L"
-            onClick={() => console.log('place order')}
+            onClick={handleAuthentication}
             disabled={!isSellAmountValid || sellAmount === ''}
           >
             Place order

@@ -7,7 +7,7 @@ import RainbowWagmiProvider from '@/lib/rainbowWagmi'
 import { ThemeProviderContext } from '@/hooks/themeProvider'
 import { ErrorBoundary, Hotjar } from '@/features/shared'
 
-const OG_TITLE = 'Abstract Swap'
+const OG_TITLE = '1Wallet'
 
 //https://nextjs.org/docs/basic-features/layouts#per-page-layouts
 export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {
