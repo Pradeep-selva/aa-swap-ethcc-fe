@@ -13,6 +13,7 @@ import {
   localStorageService,
   multiplyBNWithFloat
 } from '@/features/shared'
+import MinERC20 from '@/features/shared/assets/abi/minERC20.json'
 import * as webauthn from '@passwordless-id/webauthn'
 import React from 'react'
 import * as S from './styles'
@@ -22,141 +23,87 @@ import { StyledInput } from '@/features/shared/components/TokenInput'
 import SlippageAmount from './SlippageAmount'
 import { TAsset } from '../../types'
 import { formatUnits } from 'ethers/lib/utils.js'
-
-const mockAssets: TAsset[] = [
-  {
-    name: 'ETH',
-    address: '0x0000000000000000000000000000000000000000',
-    logo: 'https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DETH.svg',
-    decimals: 18,
-    chainId: 5,
-    prices: { default: 1902.6 },
-    apy: 0,
-    actions: [] as any,
-    value: ''
-  },
-  {
-    name: 'GNO',
-    address: '0x02ABBDbAaa7b1BB64B5c878f7ac17f8DDa169532',
-    logo: 'https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DGNO.svg',
-    decimals: 18,
-    chainId: 5,
-    prices: { default: 1 },
-    apy: 0,
-    actions: [] as any,
-    value: ''
-  },
-  {
-    name: 'WETH',
-    address: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
-    logo: 'https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DWETH.svg',
-    decimals: 18,
-    chainId: 5,
-    prices: { default: 1903.57 },
-    apy: 0,
-    actions: [] as any,
-    value: ''
-  },
-  {
-    name: 'USDC',
-    address: '0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C',
-    logo: 'https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DUSDC.svg',
-    decimals: 6,
-    chainId: 5,
-    prices: { default: 1 },
-    apy: 0,
-    actions: [] as any,
-    value: ''
-  }
-]
-const minERC20 = [
-  // balanceOf
-  {
-    constant: true,
-
-    inputs: [{ name: '_owner', type: 'address' }],
-
-    name: 'balanceOf',
-
-    outputs: [{ name: 'balance', type: 'uint256' }],
-
-    type: 'function'
-  }
-]
+import { API_ENDPOINTS, apiInstance } from '@/lib/axios'
 
 export default function LimitOrder() {
   const { theme } = useThemeContext()
 
-  const [userAssets, setUserAssets] = React.useState<Array<any>>([])
+  const [userAssets, setUserAssets] = React.useState<TAsset[]>([])
+  const [allAssets, setAllAssets] = React.useState<TAsset[]>([])
   const [isUserAssetView, setIsUserAssetView] = React.useState(false)
   const [isOrderHistoryView, setIsOrderHistoryView] = React.useState(false)
 
   React.useEffect(() => {
-    refreshBalances()
+    fetchAllAssets().then(refreshBalances)
   }, [])
 
+  const fetchAllAssets = async () => {
+    // TODO: change chain id to xDAI after testing
+    const { data } = await apiInstance.get<TAsset[]>(API_ENDPOINTS.getAssets(5))
+    setAllAssets(data)
+  }
+
   const refreshBalances = async () => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const userData = localStorageService.getAuthUserData()!
+    if (allAssets.length) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const userData = localStorageService.getAuthUserData()!
+      const mainnetProvider = new ethers.providers.JsonRpcProvider(
+        process.env.NEXT_PUBLIC_RPC
+      )
 
-    const _userAssets = await Promise.all(
-      mockAssets.map(async (asset) => {
-        try {
-          const assetAddress = asset.address
+      const _userAssets = await Promise.all(
+        allAssets.map(async (asset) => {
+          try {
+            const assetAddress = asset.address
 
-          const mainnetProvider = new ethers.providers.JsonRpcProvider(
-            process.env.NEXT_PUBLIC_RPC
-          )
+            let assetBalanceOf: BigNumber
+            if (assetAddress != '0x0000000000000000000000000000000000000000') {
+              const token = new ethers.Contract(
+                assetAddress,
+                MinERC20,
+                mainnetProvider
+              )
+              assetBalanceOf = await token.balanceOf(userData.safeAddress)
+            } else {
+              assetBalanceOf = await mainnetProvider.getBalance(
+                userData.safeAddress
+              )
+            }
 
-          let assetBalanceOf: BigNumber
-          if (assetAddress != '0x0000000000000000000000000000000000000000') {
-            console.log(userData.safeAddress)
-            const token = new ethers.Contract(
-              assetAddress,
-              minERC20,
-              mainnetProvider
+            const totalAssetValue = multiplyBNWithFloat(
+              assetBalanceOf,
+              asset.prices.default
             )
-            assetBalanceOf = await token.balanceOf(userData.safeAddress)
-            console.log(asset.name, assetBalanceOf.toString())
-          } else {
-            assetBalanceOf = await mainnetProvider.getBalance(
-              userData.safeAddress
-            )
-          }
+            const formattedBal = formatUnits(assetBalanceOf, asset.decimals)
 
-          const totalAssetValue = multiplyBNWithFloat(
-            assetBalanceOf,
-            asset.prices.default
-          )
-          const formattedBal = formatUnits(assetBalanceOf, asset.decimals)
-
-          return {
-            ...asset,
-            value: formatUnits(totalAssetValue, asset.decimals),
-            balanceOf: {
-              decimals: asset.decimals,
-              formatted: formattedBal.slice(0, formattedBal.indexOf('.') + 3),
-              symbol: asset.name,
-              value: BigNumber.from(totalAssetValue)
+            return {
+              ...asset,
+              value: formatUnits(totalAssetValue, asset.decimals),
+              balanceOf: {
+                decimals: asset.decimals,
+                formatted: formattedBal.slice(0, formattedBal.indexOf('.') + 3),
+                symbol: asset.name,
+                value: BigNumber.from(totalAssetValue)
+              }
+            }
+          } catch (err) {
+            console.error('[Error on assetWithValue]', asset.address, err)
+            return {
+              ...asset,
+              value: '0',
+              balanceOf: {
+                decimals: asset.decimals,
+                formatted: '0',
+                symbol: asset.name,
+                value: BigNumber.from(0)
+              }
             }
           }
-        } catch (err) {
-          console.error('[Error on assetWithValue]', asset.address, err)
-          return {
-            ...asset,
-            value: '0',
-            balanceOf: {
-              decimals: asset.decimals,
-              formatted: '0',
-              symbol: asset.name,
-              value: BigNumber.from(0)
-            }
-          }
-        }
-      })
-    )
-    console.log('assets', _userAssets)
-    setUserAssets(_userAssets)
+        })
+      )
+      console.log('assets', _userAssets)
+      setUserAssets(_userAssets)
+    }
   }
 
   return userAssets.length ? (
@@ -175,8 +122,6 @@ export default function LimitOrder() {
       {isUserAssetView && (
         <FlexContainer
           gap={1}
-          // alignItems="center"
-          // justifyContent="center"
           flexDirection="column"
           style={{
             marginBottom: '3vh',
@@ -196,7 +141,9 @@ export default function LimitOrder() {
                 <Typography type="BODY_MEDIUM_M">{name}</Typography>
               </FlexContainer>
               <FlexContainer flex={false}>
-                <Typography type="BODY_M">{balanceOf.formatted}</Typography>
+                <Typography type="BODY_M">
+                  {balanceOf?.formatted || ''}
+                </Typography>
               </FlexContainer>
             </FlexContainer>
           ))}
@@ -262,7 +209,7 @@ export default function LimitOrder() {
                 flexDirection="column"
               >
                 <Typography type="BODY_MEDIUM_S" color={theme.colors.gray300}>
-                  {mockAssets[0]?.name || ''} asset price
+                  {allAssets[0]?.name || ''} asset price
                 </Typography>
                 <StyledInput
                   name="depositAmount"
@@ -273,8 +220,6 @@ export default function LimitOrder() {
               </S.SellReceiveItem>
               <SlippageAmount />
             </FlexContainer>
-
-            <FlexContainer justifyContent="space-between"></FlexContainer>
           </S.DCASwap>
 
           <S.GrayBGDiv margin="0" borderRadius="0 0 0.8rem 0.8rem">
@@ -288,7 +233,7 @@ export default function LimitOrder() {
         <FlexContainer width={100} style={{ marginBottom: '6rem' }}>
           <Button
             buttonSize="L"
-            onClick={() => console.log('ordered')}
+            onClick={() => console.log('place order')}
             disabled={false}
           >
             Place order
