@@ -3,9 +3,13 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import Router from 'next/router'
 
+import { apiInstance, API_ENDPOINTS } from '@/lib/axios'
 import {
   Button,
+  DelayedLottiesLoading,
   FlexContainer,
+  LoaderLottie,
+  Typography,
   isValidUsername,
   localStorageService
 } from '@/features/shared'
@@ -26,6 +30,7 @@ export default function OnboardFlow() {
   const [formData, setFormData] = useState<OnboardingFormData>({
     accountName: ''
   })
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (localStorageService.getAuthUserData() !== null) {
@@ -66,8 +71,16 @@ export default function OnboardFlow() {
         credential: { id: credentialId }
       } = webauthn.parsers.parseRegistration(res)
 
-      // TODO: Deploy AA safe here
-      const safeAddress = '0xAE75B29ADe678372D77A8B41225654138a7E6ff1'
+      setLoading(true)
+      const {
+        data: { safeAddress }
+      } = await apiInstance.post<{ safeAddress: string }>(
+        API_ENDPOINTS.createAccount(),
+        {
+          clientId: credentialId
+        }
+      )
+      setLoading(false)
 
       localStorageService.setAuthUserData(username, credentialId, safeAddress)
       push('/limit-order')
@@ -80,17 +93,33 @@ export default function OnboardFlow() {
     <>
       <Header />
       <S.OnboardWrapper>
-        <S.StepWrapper>{onboardStep.component}</S.StepWrapper>
+        {!loading ? (
+          <>
+            <S.StepWrapper>{onboardStep.component}</S.StepWrapper>
 
-        <FlexContainer gap={1.2}>
-          <Button
-            onClick={handleSubmit}
-            disabled={onboardStep.invalidIf}
-            buttonSize="L"
+            <FlexContainer gap={1.2}>
+              <Button
+                onClick={handleSubmit}
+                disabled={onboardStep.invalidIf}
+                buttonSize="L"
+              >
+                Create account
+              </Button>
+            </FlexContainer>
+          </>
+        ) : (
+          <FlexContainer
+            alignItems="center"
+            justifyContent="center"
+            flexDirection="column"
+            gap={2}
           >
-            Create account
-          </Button>
-        </FlexContainer>
+            <DelayedLottiesLoading lotties={[LoaderLottie]} />
+            <Typography type="BODY_MEDIUM_M">
+              We are getting your account ready ...
+            </Typography>
+          </FlexContainer>
+        )}
       </S.OnboardWrapper>
     </>
   )
