@@ -34,7 +34,7 @@ export default function OnboardFlow() {
 
   useEffect(() => {
     if (localStorageService.getAuthUserData() !== null) {
-      Router.push('/limit-order')
+      Router.push('/perform-swap')
       return
     }
   }, [])
@@ -86,7 +86,7 @@ export default function OnboardFlow() {
       const safeAddress = '0x80760A7eeafA31cC68F3D488ae48590e66a40Db7'
 
       localStorageService.setAuthUserData(username, credentialId, safeAddress)
-      push('/limit-order')
+      push('/perform-swap')
     } catch (err) {
       console.error('[ERROR] on handleSubmit', err)
     }

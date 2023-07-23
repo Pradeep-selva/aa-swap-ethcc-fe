@@ -1,4 +1,4 @@
 export { default as AbstractSwapWrapper } from './components/AbstractSwapWrapper'
-export { default as LimitOrder } from './components/LimitOrder'
+export { default as PerformSwap } from './components/PerformSwap'
 
 export * from './types'

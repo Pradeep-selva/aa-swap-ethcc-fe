@@ -36,20 +36,7 @@ interface HistoricOrder {
   logo: string
 }
 
-const mockOrders = [
-  {
-    orderId: 1,
-    txHash: 'https://www.google.com',
-    logo: 'https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DGNO.svg'
-  },
-  {
-    orderId: 2,
-    txHash: 'https://www.amazon.in',
-    logo: 'https://brahma-static.s3.us-east-2.amazonaws.com/Asset/Asset%3DGNO.svg'
-  }
-]
-
-export default function LimitOrder() {
+export default function PerformSwap() {
   const { theme } = useThemeContext()
 
   const [userAssets, setUserAssets] = React.useState<TAsset[]>([])
@@ -239,7 +226,7 @@ export default function LimitOrder() {
           <S.DCAPanelHeader>
             <FlexContainer gap={1.6} alignItems="center">
               <Typography type="BODY_MEDIUM_S" color={theme.colors.gray300}>
-                Limit-Order
+                Perform Swap
               </Typography>
             </FlexContainer>
           </S.DCAPanelHeader>
