@@ -30,6 +30,12 @@ import { formatUnits } from 'ethers/lib/utils.js'
 import { API_ENDPOINTS, apiInstance } from '@/lib/axios'
 import Link from 'next/link'
 
+interface HistoricOrder {
+  orderId: string
+  txHash: string
+  logo: string
+}
+
 const mockOrders = [
   {
     orderId: 1,
@@ -55,6 +61,11 @@ export default function LimitOrder() {
   const [buyAsset, setBuyAsset] = React.useState<TAsset>()
   const [sellAmount, setSellAmount] = React.useState<string>('')
 
+  const [historicOrders, setHistoricOrders] = React.useState<HistoricOrder[]>(
+    []
+  )
+  const [loadingPlacement, setLoadingPlacement] = React.useState(false)
+
   const maxSellAssetBalance = React.useMemo(
     () => sellAsset?.balanceOf?.value || BigNumber.from(0),
     [sellAsset]
@@ -67,7 +78,9 @@ export default function LimitOrder() {
 
   const fetchAllAssets = async () => {
     // TODO: change chain id to xDAI after testing
-    const { data } = await apiInstance.get<TAsset[]>(API_ENDPOINTS.getAssets(5))
+    const { data } = await apiInstance.get<TAsset[]>(
+      API_ENDPOINTS.getAssets(137)
+    )
     setAllAssets(data)
   }
 
@@ -134,7 +147,16 @@ export default function LimitOrder() {
     }
   }
 
-  const handleAuthentication: any = async () => {
+  const refreshOrders = async () => {
+    const { data } = await apiInstance.get<HistoricOrder[]>(
+      API_ENDPOINTS.getOrders('0x80760A7eeafA31cC68F3D488ae48590e66a40Db7')
+    )
+    setHistoricOrders(data.filter(({ txHash }) => !!txHash))
+  }
+
+  const handleOrderPlacement = async () => {
+    setLoadingPlacement(true)
+
     const userData = localStorageService.getAuthUserData()!
 
     const res = await webauthn.client.authenticate(
@@ -148,11 +170,21 @@ export default function LimitOrder() {
         flags: { userVerified }
       }
     } = webauthn.parsers.parseAuthentication(res)
-    console.log('isUserVerified', userVerified)
+
+    if (!userVerified) throw new Error('Invalid Auth')
+
+    await apiInstance.post(API_ENDPOINTS.placeOrder(), {
+      clientId: 'test69691'
+    })
+
+    refreshOrders()
+    refreshBalances()
+    setLoadingPlacement(false)
   }
 
   React.useEffect(() => {
     fetchAllAssets()
+    refreshOrders()
   }, [])
 
   React.useEffect(() => {
@@ -307,10 +339,12 @@ export default function LimitOrder() {
         <FlexContainer width={100} style={{ marginBottom: '6rem' }}>
           <Button
             buttonSize="L"
-            onClick={handleAuthentication}
-            disabled={!isSellAmountValid || sellAmount === ''}
+            onClick={handleOrderPlacement}
+            disabled={
+              !isSellAmountValid || sellAmount === '' || loadingPlacement
+            }
           >
-            Place order
+            {loadingPlacement ? 'Executing order...' : 'Place order'}
           </Button>
         </FlexContainer>
 
@@ -335,7 +369,7 @@ export default function LimitOrder() {
               padding: '1rem 2rem'
             }}
           >
-            {mockOrders.map(({ orderId, txHash, logo }, idx) => (
+            {historicOrders.map(({ orderId, txHash, logo }, idx) => (
               <FlexContainer
                 key={idx}
                 justifyContent="space-between"
@@ -343,7 +377,9 @@ export default function LimitOrder() {
               >
                 <FlexContainer alignItems="center" gap={1} flex={true}>
                   <LogoViewer logo={logo} />
-                  <Typography type="BODY_MEDIUM_M">Order #{orderId}</Typography>
+                  <Typography type="BODY_MEDIUM_M">
+                    Order #{orderId.slice(0, 4)}
+                  </Typography>
                 </FlexContainer>
                 <FlexContainer flex={false}>
                   <Typography
@@ -354,7 +390,10 @@ export default function LimitOrder() {
                     }}
                   >
                     <SendIcon />
-                    <Link style={{ marginLeft: '1rem' }} href={txHash}>
+                    <Link
+                      style={{ marginLeft: '1rem' }}
+                      href={`https://polygonscan.com/tx/${txHash}`}
+                    >
                       View Tx
                     </Link>
                   </Typography>

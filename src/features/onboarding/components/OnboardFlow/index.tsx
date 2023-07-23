@@ -81,7 +81,7 @@ export default function OnboardFlow() {
       //   }
       // )
       setLoading(false)
-      const safeAddress = '0xAE75B29ADe678372D77A8B41225654138a7E6ff1'
+      const safeAddress = '0x80760A7eeafA31cC68F3D488ae48590e66a40Db7'
 
       localStorageService.setAuthUserData(username, credentialId, safeAddress)
       push('/limit-order')
