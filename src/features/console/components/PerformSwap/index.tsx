@@ -231,7 +231,7 @@ export default function PerformSwap() {
           <S.DCAPanelHeader>
             <FlexContainer gap={1.6} alignItems="center">
               <Typography type="BODY_MEDIUM_S" color={theme.colors.gray300}>
-                Perform Swap
+                Perform-Swap
               </Typography>
             </FlexContainer>
           </S.DCAPanelHeader>
