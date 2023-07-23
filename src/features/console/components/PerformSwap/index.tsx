@@ -26,7 +26,7 @@ import { BigNumber, ethers } from 'ethers'
 import { StyledInput } from '@/features/shared/components/TokenInput'
 import SlippageAmount from './SlippageAmount'
 import { TAsset } from '../../types'
-import { formatUnits } from 'ethers/lib/utils.js'
+import { formatUnits, parseUnits } from 'ethers/lib/utils.js'
 import { API_ENDPOINTS, apiInstance } from '@/lib/axios'
 import Link from 'next/link'
 
@@ -165,7 +165,7 @@ export default function PerformSwap() {
       safeAddress: userData.safeAddress,
       fromToken: sellAsset?.address,
       toToken: buyAsset?.address,
-      amount: sellAmount
+      amount: parseUnits(sellAmount, sellAsset?.decimals).toString()
     })
 
     refreshOrders()
