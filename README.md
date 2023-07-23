@@ -36,7 +36,7 @@ To use 1Wallet UI, follow the steps below:
 
 1. Clone the repository to your local machine.
 2. Install the necessary dependencies using `yarn`.
-3. Create an env with `NEXT_PUBLIC_RPC` that contains a polygon RPC endpoint.
+3. Create an env with `NEXT_PUBLIC_RPC=<polygon_RPC_endpoint>`.
 4. Start the development server with `yarn dev`.
 5. To test this on a live build, run `yarn devBuild`
 6. Visit the local development URL in your web browser to access the 1Wallet UI.
