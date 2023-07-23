@@ -80,6 +80,8 @@ export default function OnboardFlow() {
       //     clientId: credentialId
       //   }
       // )
+      await timeout(3000)
+
       setLoading(false)
       const safeAddress = '0x80760A7eeafA31cC68F3D488ae48590e66a40Db7'
 
@@ -88,6 +90,10 @@ export default function OnboardFlow() {
     } catch (err) {
       console.error('[ERROR] on handleSubmit', err)
     }
+  }
+
+  function timeout(ms: any) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
   }
 
   return (
