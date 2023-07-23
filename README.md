@@ -2,6 +2,8 @@
 
 1Wallet UI is a user interface (UI) repository built with Next.js and WebAuthn for authentication, providing an efficient server interaction to create and manage web3 wallets. The wallet is designed on top of the on-chain multisig SAFE wallet, eliminating the need to store seed phrases, and offering the convenience of FaceID/TouchID for authentication. This gasless wallet allows users to execute transactions in a custodial and trustless manner.
 
+The infrastructure that enables the smooth functioning of this UI can be found, **[HERE](https://github.com/Pradeep-selva/aa-swap-ethcc-be)**.
+
 ## Introduction
 
 1Wallet is a gasless web3 wallet that utilizes the Safe {WALLET} and the Safe AA SDK, enabling users to perform various actions such as swaps on platforms like 1inch. The wallet's core feature is the utilization of WebAuthn for authentication, allowing users to authenticate requests using FaceID or TouchID without the need to store any private keys or seed phrases.
