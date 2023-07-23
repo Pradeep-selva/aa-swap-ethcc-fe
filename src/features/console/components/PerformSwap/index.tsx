@@ -162,7 +162,7 @@ export default function PerformSwap() {
 
     await apiInstance.post(API_ENDPOINTS.placeOrder(), {
       clientId: userData.credentialId,
-      safeAddress: userData.safeAddress,
+      safe: userData.safeAddress,
       fromToken: sellAsset?.address,
       toToken: buyAsset?.address,
       amount: parseUnits(sellAmount, sellAsset?.decimals).toString()
