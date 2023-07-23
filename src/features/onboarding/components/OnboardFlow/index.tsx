@@ -72,28 +72,21 @@ export default function OnboardFlow() {
       } = webauthn.parsers.parseRegistration(res)
 
       setLoading(true)
-      // const {
-      //   data: { safeAddress }
-      // } = await apiInstance.post<{ safeAddress: string }>(
-      //   API_ENDPOINTS.createAccount(),
-      //   {
-      //     clientId: credentialId
-      //   }
-      // )
-      await timeout(3000)
-
+      const {
+        data: { safeAddress }
+      } = await apiInstance.post<{ safeAddress: string }>(
+        API_ENDPOINTS.createAccount(),
+        {
+          clientId: credentialId
+        }
+      )
       setLoading(false)
-      const safeAddress = '0x80760A7eeafA31cC68F3D488ae48590e66a40Db7'
 
       localStorageService.setAuthUserData(username, credentialId, safeAddress)
       push('/perform-swap')
     } catch (err) {
       console.error('[ERROR] on handleSubmit', err)
     }
-  }
-
-  function timeout(ms: any) {
-    return new Promise((resolve) => setTimeout(resolve, ms))
   }
 
   return (

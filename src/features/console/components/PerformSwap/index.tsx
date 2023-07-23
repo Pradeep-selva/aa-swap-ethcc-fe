@@ -64,7 +64,6 @@ export default function PerformSwap() {
   )
 
   const fetchAllAssets = async () => {
-    // TODO: change chain id to xDAI after testing
     const { data } = await apiInstance.get<TAsset[]>(
       API_ENDPOINTS.getAssets(137)
     )
@@ -135,10 +134,11 @@ export default function PerformSwap() {
   }
 
   const refreshOrders = async () => {
+    const { safeAddress } = localStorageService.getAuthUserData()!
     const { data } = await apiInstance.get<HistoricOrder[]>(
-      API_ENDPOINTS.getOrders('0x80760A7eeafA31cC68F3D488ae48590e66a40Db7')
+      API_ENDPOINTS.getOrders(safeAddress)
     )
-    setHistoricOrders([data.filter(({ txHash }) => !!txHash).pop()!])
+    setHistoricOrders(data.filter(({ txHash }) => !!txHash))
   }
 
   const handleOrderPlacement = async () => {
@@ -161,7 +161,11 @@ export default function PerformSwap() {
     if (!userVerified) throw new Error('Invalid Auth')
 
     await apiInstance.post(API_ENDPOINTS.placeOrder(), {
-      clientId: 'test69691'
+      clientId: userData.credentialId,
+      safeAddress: userData.safeAddress,
+      fromToken: sellAsset?.address,
+      toToken: buyAsset?.address,
+      amount: sellAmount
     })
 
     refreshOrders()
@@ -171,6 +175,7 @@ export default function PerformSwap() {
 
   React.useEffect(() => {
     fetchAllAssets()
+    refreshOrders()
   }, [])
 
   React.useEffect(() => {
