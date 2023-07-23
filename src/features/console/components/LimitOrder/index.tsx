@@ -151,7 +151,7 @@ export default function LimitOrder() {
     const { data } = await apiInstance.get<HistoricOrder[]>(
       API_ENDPOINTS.getOrders('0x80760A7eeafA31cC68F3D488ae48590e66a40Db7')
     )
-    setHistoricOrders(data.filter(({ txHash }) => !!txHash))
+    setHistoricOrders([data.filter(({ txHash }) => !!txHash).pop()!])
   }
 
   const handleOrderPlacement = async () => {
@@ -184,7 +184,6 @@ export default function LimitOrder() {
 
   React.useEffect(() => {
     fetchAllAssets()
-    refreshOrders()
   }, [])
 
   React.useEffect(() => {
@@ -369,37 +368,47 @@ export default function LimitOrder() {
               padding: '1rem 2rem'
             }}
           >
-            {historicOrders.map(({ orderId, txHash, logo }, idx) => (
+            {historicOrders.length ? (
+              historicOrders.map(({ orderId, txHash, logo }, idx) => (
+                <FlexContainer
+                  key={idx}
+                  justifyContent="space-between"
+                  style={{ width: '100%' }}
+                >
+                  <FlexContainer alignItems="center" gap={1} flex={true}>
+                    <LogoViewer logo={logo} />
+                    <Typography type="BODY_MEDIUM_M">
+                      Order #{orderId.slice(0, 4)}
+                    </Typography>
+                  </FlexContainer>
+                  <FlexContainer flex={false}>
+                    <Typography
+                      type="BODY_M"
+                      style={{
+                        alignItems: 'center',
+                        display: 'flex'
+                      }}
+                    >
+                      <SendIcon />
+                      <Link
+                        style={{ marginLeft: '1rem' }}
+                        href={`https://polygonscan.com/tx/${txHash}`}
+                      >
+                        View Tx
+                      </Link>
+                    </Typography>
+                  </FlexContainer>
+                </FlexContainer>
+              ))
+            ) : (
               <FlexContainer
-                key={idx}
-                justifyContent="space-between"
+                justifyContent="center"
+                alignItems="center"
                 style={{ width: '100%' }}
               >
-                <FlexContainer alignItems="center" gap={1} flex={true}>
-                  <LogoViewer logo={logo} />
-                  <Typography type="BODY_MEDIUM_M">
-                    Order #{orderId.slice(0, 4)}
-                  </Typography>
-                </FlexContainer>
-                <FlexContainer flex={false}>
-                  <Typography
-                    type="BODY_M"
-                    style={{
-                      alignItems: 'center',
-                      display: 'flex'
-                    }}
-                  >
-                    <SendIcon />
-                    <Link
-                      style={{ marginLeft: '1rem' }}
-                      href={`https://polygonscan.com/tx/${txHash}`}
-                    >
-                      View Tx
-                    </Link>
-                  </Typography>
-                </FlexContainer>
+                <Typography type="BODY_MEDIUM_M">No orders yet</Typography>
               </FlexContainer>
-            ))}
+            )}
           </FlexContainer>
         )}
       </S.DCAWrapper>
